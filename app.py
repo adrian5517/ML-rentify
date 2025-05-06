@@ -24,6 +24,10 @@ except errors.ServerSelectionTimeoutError as err:
     client = None
     collection = None
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"message": "Server is running"}), 200
+
 # Diagnostic route
 @app.route('/check-db', methods=['GET'])
 def check_db():
