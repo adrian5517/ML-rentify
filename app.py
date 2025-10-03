@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import logging
 
-# Load environment variables
+# Load environment variablesssss
 load_dotenv()
 
 app = Flask(__name__)
