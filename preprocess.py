@@ -86,6 +86,12 @@ def preprocess_data(df, scaler=None, fit=False):
         scaler = RobustScaler()
         scaled_data = scaler.fit_transform(df_features)
         logging.info(f"✅ Fitted new scaler on {len(df_features)} samples")
+        # Defensive: ensure scaler knows the feature names, useful if sklearn behavior differs by version
+        try:
+            scaler.feature_names_in_ = df_features.columns.to_numpy()
+        except Exception:
+            # not critical — sklearn usually sets this automatically when fitting on a DataFrame
+            logging.debug("Could not set scaler.feature_names_in_, proceeding anyway")
     else:
         scaled_data = scaler.transform(df_features)
         logging.info(f"✅ Applied existing scaler on {len(df_features)} samples")
