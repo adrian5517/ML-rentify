@@ -252,8 +252,23 @@ def ml_api():
 
             try:
                 # Scale the input point using the same scaler
-                point = np.array([[float(price), float(latitude), float(longitude)]])
-                point_scaled = scaler.transform(point)[0]
+                try:
+                    # Build a DataFrame with explicit column names to match scaler training
+                    input_record = {
+                        'price': float(price),
+                        'latitude': float(latitude),
+                        'longitude': float(longitude)
+                    }
+                    # Prefer scaler.feature_names_in_ if available to ensure ordering
+                    feature_cols = list(getattr(scaler, 'feature_names_in_', ['price', 'latitude', 'longitude']))
+                    df_point = pd.DataFrame([{c: input_record.get(c) for c in feature_cols}])
+
+                    # Transform with DataFrame to preserve feature names (avoids sklearn warning)
+                    point_scaled = scaler.transform(df_point)[0]
+                except Exception as scale_ex:
+                    logging.warning('Scaler transform with DataFrame failed (%s), falling back to numpy array: %s', type(scale_ex).__name__, scale_ex)
+                    point = np.array([[float(price), float(latitude), float(longitude)]])
+                    point_scaled = scaler.transform(point)[0]
 
                 # Validate k_neighbors
                 if k_neighbors > len(data_array):
